@@ -9,9 +9,11 @@
 
 #include "wav.h"
 
-#define WAV_FILE "tmp.wav"
+#define WAV_FILE "sample.wav"
 
-#define WAV_VOLUME_PERCENT (0.50)
+#define WAV_VOLUME_PERCENT (0.80)
+
+#define MAX_FILE_SIZE (100000)
 
 void wav_parse_header(void *buf)
 {
@@ -62,45 +64,17 @@ void wav_parse_header(void *buf)
 	printf("Signal time: %fs\n", ((double)wav->data_size / wav->byterate));
 }
 
-void wav_dump_data(char *buf, int size)
-{
-	int i, count = 0;
-
-	char ch;
-
-	for (i = 0; i < size; i++) {
-		if (ch == buf[i]) {
-			count++;
-			continue;
-		} else {
-			if (count > 0) {
-				//printf("[%d] ", count);
-			}
-
-			count = 0;
-		}
-
-		printf("%03d ", (int)(char)buf[i]);
-
-		if (i % 10 == 0) {
-			printf("\n");
-		}
-
-		ch = buf[i];
-	}
-
-	printf("size = %d\n", size);
-}
-
-void wav_modify_volume(struct wav *wav, char *buf, int size)
+void wav_modify_volume(struct wav *wav, int16_t *buf, int size)
 {
 	int fd, i;
 
-	char data, ch, raw_buf[16000];
+	char ch;
+
+	int16_t data, raw_buf[MAX_FILE_SIZE];
 
 	struct wav wav_buf;
 
-	fd = open("Wav-modify-volume.wav", O_RDWR | O_CREAT, 0664);
+	fd = open("sample-modified.wav", O_RDWR | O_CREAT, 0664);
 
 	if (fd < 0) {
 		perror("open error: ");
@@ -108,35 +82,13 @@ void wav_modify_volume(struct wav *wav, char *buf, int size)
 	}
 
 	write(fd, wav, sizeof(struct wav));
+
+	printf("size = %d\n", size);
 	
-	for (i = 0; i < size; i++) {
-		data = buf[i] * WAV_VOLUME_PERCENT;
+	for (i = 0; i < size / 2; i++) {
+		data = buf[i] + buf[i] * WAV_VOLUME_PERCENT;
 
-		write(fd, &data, 1);
-	}
-
-	close(fd);
-
-	fd = open("Wav-modify-volume.wav", O_RDONLY);
-
-	if (fd < 0) {
-		perror("open error: ");
-		exit(-1);
-	}
-
-	read(fd, &wav_buf, sizeof(struct wav));
-
-	printf("Parsing Modified File\n");
-
-	wav_parse_header(&wav_buf);
-
-	printf("Want data to be dumped Y/N: ");
-
-	scanf(" %c", &ch);
-
-	if (ch == 'Y' || ch == 'y') {
-		size = read(fd, raw_buf, 160000);
-		wav_dump_data(raw_buf, size);
+		write(fd, &data, 2);
 	}
 
 	close(fd);
@@ -148,7 +100,9 @@ int main(void)
 
 	struct wav wav;
 
-	char buf[160000], ch, data;
+	char ch, data;
+
+	int16_t buf[MAX_FILE_SIZE];
 
 	fd = open(WAV_FILE, O_RDONLY);
 
@@ -165,23 +119,7 @@ int main(void)
 
 	printf("ret = %d\n", ret);
 
-	ch = '\0';
-
-	printf("Want data to be dumped Y/N: ");
-
-	scanf("%c", &ch);
-
-	if (ch == 'Y' || ch == 'y') {
-		wav_dump_data(buf, ret);
-	}
-
-	printf("Want to Modify the Wav file Y/N: ");
-
-	scanf(" %c", &ch);
-
-	if (ch == 'Y' || ch == 'y') {
-		wav_modify_volume(&wav, buf, ret);
-	}
+	wav_modify_volume(&wav, buf, ret);
 
 	return 0;
 }

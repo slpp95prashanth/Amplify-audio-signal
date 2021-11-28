@@ -7,8 +7,8 @@ import wave, sys
 def visualize(path: str):
 	
 	# reading the audio file
-	raw = wave.open(path)
-	raw1 = wave.open("tmp.wav")
+	raw1 = wave.open(path)
+	raw = wave.open("sample.wav")
 	
 	# reads all the frames
 	# -1 indicates all or max frames
@@ -42,7 +42,7 @@ def visualize(path: str):
 	plt.figure(1)
 	
 	# title of the plot
-	plt.title("Sound Wave")
+	plt.title("Sound Wave r -> Original .wav file")
 	
 	# label of x-axis
 	plt.xlabel("Time")
