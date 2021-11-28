@@ -1,6 +1,6 @@
 Steps\
 Create the sample.wav file.
-> $ arecord -r 16000 -f S16_LE -t wav sample.wav
+> $ arecord -r 16000 -f S16_LE -c 1 -t wav sample.wav
 
 Compile the amplify-signal.c file.
 > $ gcc amplify-signal.c
