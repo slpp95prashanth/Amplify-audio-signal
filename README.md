@@ -10,3 +10,6 @@ Execute the build file
 
 Plot the files
 > $ python3 plot.py sample-modified.wav
+
+Note: If the python packages matplotlib, numpy, wave are not installed \
+then install the packages.
